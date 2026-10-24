@@ -1,0 +1,102 @@
+{
+  "TRK-2001": {
+    "cliente": "Ana Restrepo",
+    "email": "ana.restrepo@example.com",
+    "producto": "Botella reutilizable de acero inoxidable 750ml",
+    "estado": "entregado",
+    "fecha_pedido": "2026-10-03",
+    "fecha_entrega_real": "2026-10-10",
+    "ciudad_destino": "Bogotá",
+    "direccion": "Calle 85 #12-40, Apto 302"
+  },
+  "TRK-2002": {
+    "cliente": "Carlos Pena",
+    "email": "carlos.pena@example.com",
+    "producto": "Set de cubiertos de bambú (4 piezas)",
+    "estado": "entregado",
+    "fecha_pedido": "2026-08-20",
+    "fecha_entrega_real": "2026-08-26",
+    "ciudad_destino": "Medellín",
+    "direccion": "Carrera 43A #5-20"
+  },
+  "TRK-2003": {
+    "cliente": "Luisa Fernanda Gomez",
+    "email": "luisa.gomez@example.com",
+    "producto": "Jabón artesanal de avena (paquete x3)",
+    "estado": "entregado",
+    "fecha_pedido": "2026-10-08",
+    "fecha_entrega_real": "2026-10-15",
+    "ciudad_destino": "Cali",
+    "direccion": "Avenida 6N #23-15"
+  },
+  "TRK-2004": {
+    "cliente": "Jorge Andres Diaz",
+    "email": "jorge.diaz@example.com",
+    "producto": "Mochila de fibras recicladas 20L",
+    "estado": "en_transito",
+    "fecha_pedido": "2026-10-17",
+    "fecha_estimada_entrega": "2026-10-24",
+    "ciudad_destino": "Barranquilla",
+    "direccion": "Calle 72 #54-10"
+  },
+  "TRK-2005": {
+    "cliente": "Maria Camila Torres",
+    "email": "maria.torres@example.com",
+    "producto": "Champú sólido natural",
+    "estado": "cancelado",
+    "fecha_pedido": "2026-10-05",
+    "ciudad_destino": "Bucaramanga",
+    "direccion": "Carrera 27 #36-80",
+    "motivo_cancelacion": "Solicitado por el cliente antes del envío"
+  },
+  "TRK-2006": {
+    "cliente": "Pedro Ramirez",
+    "email": "pedro.ramirez@example.com",
+    "producto": "Kit de popotes de acero con cepillo",
+    "estado": "entregado",
+    "fecha_pedido": "2026-10-11",
+    "fecha_entrega_real": "2026-10-18",
+    "ciudad_destino": "Bogotá",
+    "direccion": "Transversal 19 #100-35"
+  },
+  "TRK-2007": {
+    "cliente": "Natalia Suarez",
+    "email": "natalia.suarez@example.com",
+    "producto": "Desodorante natural en barra",
+    "estado": "entregado",
+    "fecha_pedido": "2026-10-07",
+    "fecha_entrega_real": "2026-10-14",
+    "ciudad_destino": "Pereira",
+    "direccion": "Calle 14 #23-50"
+  },
+  "TRK-2008": {
+    "cliente": "Andres Felipe Lopez",
+    "email": "andres.lopez@example.com",
+    "producto": "Snack de frutas deshidratadas orgánico",
+    "estado": "entregado",
+    "fecha_pedido": "2026-10-13",
+    "fecha_entrega_real": "2026-10-19",
+    "ciudad_destino": "Cartagena",
+    "direccion": "Barrio Manga, Calle 26 #20-11"
+  },
+  "TRK-2009": {
+    "cliente": "Valentina Rojas",
+    "email": "valentina.rojas@example.com",
+    "producto": "Cepillo de dientes de bambú (paquete x4)",
+    "estado": "entregado",
+    "fecha_pedido": "2026-10-09",
+    "fecha_entrega_real": "2026-10-16",
+    "ciudad_destino": "Manizales",
+    "direccion": "Carrera 23 #65-12"
+  },
+  "TRK-2010": {
+    "cliente": "Sebastian Mora",
+    "email": "sebastian.mora@example.com",
+    "producto": "Bolsas reutilizables de malla para mercado (set x5)",
+    "estado": "entregado",
+    "fecha_pedido": "2026-09-15",
+    "fecha_entrega_real": "2026-09-22",
+    "ciudad_destino": "Bogotá",
+    "direccion": "Calle 53 #9-28"
+  }
+}

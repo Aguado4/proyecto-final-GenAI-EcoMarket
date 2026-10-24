@@ -1,0 +1,11 @@
+.env
+.env.local
+__pycache__/
+*.pyc
+.venv/
+venv/
+chroma_db/
+.pytest_cache/
+outputs/etiquetas/
+outputs/registro_acciones.jsonl
+outputs/tickets_escalamiento.jsonl

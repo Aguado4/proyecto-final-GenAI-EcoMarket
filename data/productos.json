@@ -1,0 +1,79 @@
+{
+  "Botella reutilizable de acero inoxidable 750ml": {
+    "categoria": "hogar",
+    "es_perecedero": false,
+    "es_higiene_personal": false,
+    "politica_devolucion": "devolvible",
+    "dias_para_devolver": 30
+  },
+  "Set de cubiertos de bambú (4 piezas)": {
+    "categoria": "hogar",
+    "es_perecedero": false,
+    "es_higiene_personal": false,
+    "politica_devolucion": "devolvible",
+    "dias_para_devolver": 30
+  },
+  "Jabón artesanal de avena (paquete x3)": {
+    "categoria": "cuidado_personal",
+    "es_perecedero": false,
+    "es_higiene_personal": true,
+    "politica_devolucion": "no_devolvible_si_abierto",
+    "dias_para_devolver": 0
+  },
+  "Champú sólido natural": {
+    "categoria": "cuidado_personal",
+    "es_perecedero": false,
+    "es_higiene_personal": true,
+    "politica_devolucion": "no_devolvible_si_abierto",
+    "dias_para_devolver": 0
+  },
+  "Desodorante natural en barra": {
+    "categoria": "cuidado_personal",
+    "es_perecedero": false,
+    "es_higiene_personal": true,
+    "politica_devolucion": "no_devolvible_si_abierto",
+    "dias_para_devolver": 0
+  },
+  "Cepillo de dientes de bambú (paquete x4)": {
+    "categoria": "cuidado_personal",
+    "es_perecedero": false,
+    "es_higiene_personal": true,
+    "politica_devolucion": "no_devolvible",
+    "dias_para_devolver": 0
+  },
+  "Mochila de fibras recicladas 20L": {
+    "categoria": "hogar",
+    "es_perecedero": false,
+    "es_higiene_personal": false,
+    "politica_devolucion": "devolvible",
+    "dias_para_devolver": 30
+  },
+  "Kit de popotes de acero con cepillo": {
+    "categoria": "hogar",
+    "es_perecedero": false,
+    "es_higiene_personal": false,
+    "politica_devolucion": "devolvible",
+    "dias_para_devolver": 30
+  },
+  "Set de contenedores de vidrio para alimentos (3 uds)": {
+    "categoria": "hogar",
+    "es_perecedero": false,
+    "es_higiene_personal": false,
+    "politica_devolucion": "devolvible",
+    "dias_para_devolver": 30
+  },
+  "Bolsas reutilizables de malla para mercado (set x5)": {
+    "categoria": "hogar",
+    "es_perecedero": false,
+    "es_higiene_personal": false,
+    "politica_devolucion": "devolvible",
+    "dias_para_devolver": 30
+  },
+  "Snack de frutas deshidratadas orgánico": {
+    "categoria": "alimentos",
+    "es_perecedero": true,
+    "es_higiene_personal": false,
+    "politica_devolucion": "no_devolvible",
+    "dias_para_devolver": 0
+  }
+}
