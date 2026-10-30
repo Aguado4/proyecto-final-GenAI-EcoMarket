@@ -1,32 +1,17 @@
 # Fase 3 — Análisis Crítico y Propuestas de Mejora
 
-> Esta fase es de reflexión propia: los bloques **POR COMPLETAR** son para
-> tu análisis. Debajo de cada uno hay hechos del sistema (lo que ya hace
-> el código) que puedes citar como evidencia.
-
 ## Análisis de seguridad y ética
 
-> **POR COMPLETAR:** riesgos nuevos que aparecen cuando la IA no solo
-> responde, sino que **actúa** (genera etiquetas, crea tickets), con
-> escenarios concretos y cómo mitigarlos.
->
-> Preguntas guía:
-> - ¿Qué pasa si alguien da el número de pedido de otra persona? (hoy no
->   se verifica la identidad del cliente)
-> - ¿Qué pasa si el LLM se equivoca y aprueba algo que no debía? ¿Quién
->   asume el costo?
-> - ¿Es justo para el cliente que una IA le niegue una devolución? ¿Debe
->   saber que habla con una IA y poder pedir un humano?
-> - Prompt injection: ¿qué cubre el guardrail por reglas y qué no
->   (variantes, otros idiomas, instrucciones escondidas)?
-> - Privacidad: ¿qué datos personales ve el LLM y dónde quedan guardados?
-> - Sesgos: ¿el tono o el criterio cambia según cómo escribe el cliente?
+El principal riesgo nuevo de darle a la IA la capacidad de tomar acciones
+es que **puede ejecutar acciones que el usuario no quería y que le
+resulten perjudiciales**. Por eso hay que **limitar mucho el uso de
+herramientas**: darle al agente solo las acciones estrictamente
+necesarias y con reglas claras sobre cuándo puede ejecutarlas.
 
-Mitigaciones que **ya implementa** el código (para citar):
+En este proyecto, ese límite se aplica así:
 - Las reglas de elegibilidad son código determinista, no criterio del
   LLM. La etiqueta se niega sin una verificación `elegible` previa.
-- Las etiquetas son idempotentes: una por pedido, sin duplicados ni
-  abuso de reenvíos.
+- Las etiquetas son idempotentes: una por pedido, sin duplicados.
 - Guardrail de entrada contra prompt injection, mensajes vacíos y
   mensajes demasiado largos.
 - `consultar_pedido` enmascara el email y no expone la dirección.
@@ -37,22 +22,39 @@ Mitigaciones que **ya implementa** el código (para citar):
 
 ## Monitoreo y observabilidad
 
-> **POR COMPLETAR:** tu propuesta de cómo asegurar que el agente funciona
-> bien en producción. Qué medirías, qué alertas pondrías y con qué
-> umbrales, y quién revisa qué.
+Se puede monitorear con distintas plataformas de observabilidad,
+preferiblemente usando **OpenTelemetry** como estándar, registrando por
+cada interacción:
+- La información que envía el usuario y la respuesta del agente.
+- Qué herramientas usa el agente.
+- El costo de cada interacción.
+- Si usa el RAG, qué documentos recupera.
 
-Lo que ya existe (para construir sobre ello):
+Además, se pueden agregar **guardrails** que detecten de forma
+determinista palabras peligrosas, insultos o señales de que el usuario
+está frustrado, para manejar mejor la conversación (por ejemplo,
+escalando a un humano a tiempo).
+
+Base que ya existe en el proyecto:
 - `outputs/registro_acciones.jsonl`: cada llamada a herramienta queda
   registrada con sesión, argumentos, estado, detalle y latencia.
 - Pestaña **Monitoreo** en la app: total de acciones, etiquetas,
   escalamientos, errores, latencia media y gráfico por herramienta.
 - Traza por respuesta en la UI: ruta en el grafo y argumentos y
   resultados de cada herramienta.
-- `python -m agent.evaluate` como prueba de regresión del comportamiento
-  (por ejemplo, correrla antes de cambiar el prompt o el modelo).
+- `python -m agent.evaluate` como prueba de regresión del comportamiento.
 
 ## Propuestas de mejora
 
-> **POR COMPLETAR:** otras funcionalidades con agentes. El enunciado
-> sugiere crear una orden de reemplazo o actualizar el CRM. Piensa qué
-> herramientas nuevas implicaría cada una y qué riesgos agregaría.
+- **Dictado por voz:** para que la aplicación sea más accesible para
+  personas con dificultades motrices.
+- **Botón para escalar a un humano:** que el usuario pueda pedirlo
+  directamente, sin depender de que el agente lo decida.
+- **Visualización de pedidos:** herramientas que muestren los pedidos
+  del cliente en gráficos o tablas.
+- **Integración con un CRM:** actualizar la información del cliente y
+  consultar sus pedidos previos.
+- **Agendamiento de reuniones:** conectar con una aplicación como
+  Calendly para que, si el usuario quiere reunirse con un agente de
+  ventas, pueda agendar la reunión desde el mismo chat sin cambiar de
+  aplicación.
