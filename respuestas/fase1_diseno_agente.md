@@ -6,12 +6,13 @@ El RAG del Taller 2 (Chroma + embeddings multilingües + re-ranking con
 cross-encoder) se incorpora como **una herramienta más del agente**
 (`buscar_politicas_y_faq`), no como una ruta separada de un router.
 
-> **POR COMPLETAR (tu justificación):** ¿por qué herramienta y no router?
-> Ideas para orientarte: con un router las reglas de entrada deciden antes
-> del LLM (más predecible y barato, pero rígido ante mensajes mixtos como
-> "¿cuánto cuesta la mochila y puedo devolver la de mi pedido TRK-2004?");
-> como herramienta el LLM decide y puede combinar RAG + acciones en el
-> mismo turno, a cambio de depender de su criterio.
+Se eligió como herramienta porque **no siempre se va a querer usar el
+RAG**. Muchas consultas se resuelven con otra herramienta (consultar un
+pedido, verificar la elegibilidad, generar la etiqueta) o sin ninguna (un
+saludo). Pasar siempre por el RAG en esos casos añadiría **latencia**
+(búsqueda vectorial + re-ranking con el cross-encoder) y **costos** (más
+tokens de contexto en cada llamada al LLM) sin aportar nada. Como
+herramienta, el agente lo consulta solo cuando la pregunta lo necesita.
 
 ## Definición de las herramientas
 
@@ -46,11 +47,14 @@ en el código, no solo en el prompt, así que el LLM no puede saltársela.
 
 **LangChain + LangGraph.**
 
-> **POR COMPLETAR (tu justificación):** tus razones fueron que es el marco
-> que más conoces y que LangGraph permite ver el diagrama de flujo y el grafo
-> de decisiones del agente. Puedes complementarlas comparando con
-> LlamaIndex (más orientado a indexación y recuperación de documentos;
-> sus agentes existen, pero el control explícito del flujo es menor).
+Razones de la elección:
+- **Facilidad de uso como developer:** definir herramientas, enlazarlas
+  al LLM y armar el agente requiere poco código.
+- **Integración con LangGraph:** se usa todo el stack de LangChain en
+  conjunto, y LangGraph permite ver los flujos del agente y su grafo de
+  decisiones.
+- **Familiaridad:** es el marco que mejor conocemos, lo que reduce el
+  tiempo de desarrollo y los errores.
 
 Hechos del proyecto que apoyan la elección:
 - El Taller 2 ya usaba LangChain (Chroma, embeddings, splitters), así que
