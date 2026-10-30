@@ -2,10 +2,19 @@
 
 ## Selección de la herramienta: Streamlit
 
-> **POR COMPLETAR (tu justificación):** tu razón principal fue que ya
-> tienes experiencia con Streamlit (y el Taller 2 ya tenía su UI en
-> Streamlit). Puedes compararlo con Gradio en facilidad de uso y
-> funcionalidad.
+Se escogió **Streamlit** sobre Gradio por:
+- **Familiaridad:** ya tenemos experiencia con Streamlit, y la UI del
+  Taller 2 ya estaba hecha con él.
+- **Propósito:** Streamlit está pensado para apps de datos y dashboards,
+  mientras que Gradio está orientado a demos de modelos de ML. Esta app
+  necesita más que un chat: el grafo del agente, el panel de monitoreo,
+  las tarjetas de etiqueta y los ejemplos en la barra lateral.
+- **Flexibilidad:** ofrece lo necesario para el chatbot y es más flexible
+  para el layout (pestañas, barra lateral, columnas, métricas, CSS
+  propio). Gradio da un chat listo en una línea (`gr.ChatInterface`),
+  pero personalizar algo tipo dashboard cuesta más. Con experiencia como
+  ingeniero de software, usar una biblioteca más flexible no es un
+  problema.
 
 Funcionalidades de Streamlit que usa la app (para apoyar la justificación):
 - `st.chat_message` / `st.chat_input` para el chat.
