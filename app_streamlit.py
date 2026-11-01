@@ -14,7 +14,7 @@ import pandas as pd
 import streamlit as st
 
 from agent import audit, config
-from agent.graph import build_graph, graph_mermaid, new_thread_id, run_turn
+from agent.graph import build_graph, new_thread_id, run_turn
 from agent.tools import ALL_TOOLS
 
 st.set_page_config(page_title="EcoMarket · Agente de devoluciones", page_icon=":material/recycling:", layout="wide")
@@ -221,13 +221,138 @@ def handle_prompt(prompt: str) -> None:
         st.session_state.thread_id = new_thread_id()
 
 
-def render_mermaid(code: str, height: int = 520) -> None:
+GRAPH_NODES = {
+    # nodo: (título, descripción, clase de estilo)
+    "__start__": ("Inicio", "Mensaje del cliente", "term"),
+    "validar_entrada": ("validar_entrada", "Guardrail por reglas (regex)", "guard"),
+    "respuesta_bloqueada": ("respuesta_bloqueada", "Rechaza sin llamar al LLM", "block"),
+    "agente": ("agente", "LLM en Groq con bind_tools", "llm"),
+    "__end__": ("Fin", "Respuesta al cliente", "term"),
+}
+
+EDGE_LABELS = {
+    ("validar_entrada", "agente"): "mensaje válido",
+    ("validar_entrada", "respuesta_bloqueada"): "injection, vacío o muy largo",
+    ("agente", "herramientas"): "pide herramientas",
+    ("agente", "__end__"): "responde",
+    ("herramientas", "agente"): "resultados",
+}
+
+GRAPH_CLASSES = """
+    classDef term fill:#2b3445,stroke:#8b95a7,color:#e6edf3
+    classDef guard fill:#fff4d6,stroke:#c99a2e,color:#3b2f0b
+    classDef block fill:#fde2e1,stroke:#c0392b,color:#5c1611
+    classDef llm fill:#dbe8ff,stroke:#3b6fd8,color:#0f2a5c
+    classDef tool fill:#eef1f5,stroke:#8b95a7,color:#1a1f29
+    classDef visited fill:#c9ecd7,stroke:#2ecc71,stroke-width:3px,color:#0b3d24
+"""
+
+
+def build_agent_mermaid(graph, path: list[str], used_tools: set[str]) -> str:
+    """Arma el Mermaid a partir de las aristas reales del grafo de LangGraph,
+    con el nodo de herramientas expandido y el último turno resaltado."""
+    steps = ["__start__", *path, "__end__"] if path else []
+    visited, walked = set(steps), set(zip(steps, steps[1:]))
+
+    def box(title: str, desc: str) -> str:
+        return f'"<b>{title}</b><br/><small>{desc}</small>"'
+
+    lines = ["flowchart LR"]
+    for node, (title, desc, cls) in GRAPH_NODES.items():
+        shape = "([{}])" if node.startswith("__") else "[{}]"
+        lines.append(f"    {node}{shape.format(box(title, desc))}:::{'visited' if node in visited else cls}")
+
+    # El ToolNode se dibuja como un grupo con cada herramienta adentro.
+    tool_ids = [f"t{i}" for i in range(len(ALL_TOOLS))]
+    lines.append('    subgraph herramientas["herramientas (ToolNode)"]')
+    lines.append("        direction TB")
+    for tid, t in zip(tool_ids, ALL_TOOLS):
+        label = TOOL_LABELS.get(t.name, (t.name,))[0]
+        lines.append(f"        {tid}[{box(label, t.name)}]:::{'visited' if t.name in used_tools else 'tool'}")
+    lines.append("    end")
+
+    # Los enlaces invisibles (~~~) apilan las herramientas en columna; las
+    # aristas van en el sentido del flujo para que el layout quede ordenado.
+    links, walked_links = [], []
+    for a, b in zip(tool_ids, tool_ids[1:]):
+        links.append(f"    {a} ~~~ {b}")
+    flow_order = ["__start__", "validar_entrada", "agente", "herramientas", "respuesta_bloqueada"]
+    edges = sorted(graph.get_graph().edges, key=lambda e: flow_order.index(e.source) if e.source in flow_order else 99)
+    for edge in edges:
+        arrow = "-.->" if edge.conditional else "-->"
+        label = EDGE_LABELS.get((edge.source, edge.target), edge.data or "")
+        links.append(f'    {edge.source} {arrow}|"{label}"| {edge.target}' if label else f"    {edge.source} {arrow} {edge.target}")
+        if (edge.source, edge.target) in walked:
+            walked_links.append(len(links) - 1)
+    lines += links
+
+    lines.append(GRAPH_CLASSES)
+    border = "#2ecc71" if "herramientas" in visited else "#5b6577"
+    lines.append(f"    style herramientas fill:#161d29,stroke:{border},stroke-width:2px,color:#e6edf3")
+    if walked_links:
+        lines.append(f"    linkStyle {','.join(map(str, walked_links))} stroke:#2ecc71,stroke-width:3px")
+    return "\n".join(lines)
+
+
+GRAPH_LEGEND = """
+<div class="legend">
+  <span><svg width="38" height="10"><line x1="0" y1="5" x2="38" y2="5" stroke="#9aa4b2" stroke-width="2"/></svg>
+    Obligatoria: siempre se recorre</span>
+  <span><svg width="38" height="10"><line x1="0" y1="5" x2="38" y2="5" stroke="#9aa4b2" stroke-width="2" stroke-dasharray="4 4"/></svg>
+    Condicional: la decide el guardrail o el LLM</span>
+  <span><svg width="38" height="10"><line x1="0" y1="5" x2="38" y2="5" stroke="#2ecc71" stroke-width="3"/></svg>
+    Camino del último turno</span>
+  <span><i style="background:#c9ecd7;border:2px solid #2ecc71"></i>Nodo o herramienta usada en el último turno</span>
+  <span><i style="background:#fff4d6;border:1px solid #c99a2e"></i>Guardrail</span>
+  <span><i style="background:#dbe8ff;border:1px solid #3b6fd8"></i>LLM</span>
+  <span><i style="background:#fde2e1;border:1px solid #c0392b"></i>Bloqueo</span>
+</div>
+"""
+
+
+def render_mermaid(code: str, height: int = 660) -> None:
+    # El código va como string JSON a mermaid.render() en vez de dentro del
+    # HTML, así el navegador no reinterpreta "<", ">" ni "&". El layout ELK
+    # ubica mejor el grupo de herramientas que el layout por defecto. La
+    # tarjeta tiene fondo propio para que se lea igual con tema claro u oscuro.
     st.iframe(
         f"""
-        <div class="mermaid" style="display:flex;justify-content:center">{html.escape(code)}</div>
+        <style>
+          body {{ margin:0; font-family:"Source Sans Pro",sans-serif; }}
+          .card {{ background:#0f141c; border:1px solid #263040; border-radius:12px; padding:16px; color:#e6edf3; }}
+          #grafo {{ display:flex; justify-content:center; }}
+          #grafo .edgeLabel, #grafo .edgeLabel p, #grafo .edgeLabel span {{ color:#e6edf3 !important; background:#1c2230 !important; }}
+          #grafo .cluster-label span, #grafo .cluster-label p {{ color:#e6edf3 !important; }}
+          .legend {{ display:flex; flex-wrap:wrap; gap:8px 22px; margin-top:12px; padding-top:12px; border-top:1px solid #263040; font-size:13px; }}
+          .legend span {{ display:inline-flex; align-items:center; gap:8px; }}
+          .legend i {{ display:inline-block; width:16px; height:12px; border-radius:3px; }}
+        </style>
+        <div class="card"><div id="grafo"></div>{GRAPH_LEGEND}</div>
         <script type="module">
           import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
-          mermaid.initialize({{ startOnLoad: true, theme: "neutral" }});
+          import elk from "https://cdn.jsdelivr.net/npm/@mermaid-js/layout-elk@0/dist/mermaid-layout-elk.esm.min.mjs";
+          mermaid.registerLayoutLoaders(elk);
+          mermaid.initialize({{
+            startOnLoad: false, theme: "base", layout: "elk",
+            themeVariables: {{ lineColor: "#9aa4b2", fontFamily: "Source Sans Pro, sans-serif" }},
+            flowchart: {{ curve: "basis", padding: 12 }},
+          }});
+          // Streamlit carga el iframe aunque la pestaña esté oculta; ahí mide
+          // el texto como 0 y el SVG sale vacío. Se dibuja cuando sea visible.
+          let drawn = false;
+          async function draw() {{
+            if (drawn || window.innerWidth === 0) return;
+            drawn = true;
+            try {{
+              const {{ svg }} = await mermaid.render("grafo-svg", {json.dumps(code)});
+              document.getElementById("grafo").innerHTML = svg;
+            }} catch (err) {{
+              document.getElementById("grafo").textContent = "No se pudo dibujar el grafo: " + err.message;
+            }}
+          }}
+          window.addEventListener("resize", draw);
+          const poll = setInterval(() => {{ draw(); if (drawn) clearInterval(poll); }}, 250);
+          draw();
         </script>
         """,
         height=height,
@@ -237,14 +362,12 @@ def render_mermaid(code: str, height: int = 520) -> None:
 def graph_tab() -> None:
     st.subheader("Grafo de decisiones (LangGraph)")
     st.caption(
-        "Generado en vivo con `graph.get_graph().draw_mermaid()`. En verde, los nodos por los que pasó el último turno."
+        "Construido en vivo con los nodos y aristas reales de `graph.get_graph()`, con el nodo de "
+        "herramientas expandido. En verde, el camino y las herramientas del último turno."
     )
-    code = graph_mermaid(get_graph(st.session_state.model))
-    visited = sorted({n for n in st.session_state.last_path if n in NODE_LABELS})
-    if visited:
-        code += "\n\tclassDef visited fill:#c9ecd7,stroke:#1f7a4d,stroke-width:2px;\n"
-        code += f"\tclass {','.join(visited)} visited;\n"
-    render_mermaid(code)
+    last = next((m for m in reversed(st.session_state.messages) if m["role"] == "assistant"), None)
+    used_tools = {c["name"] for c in last.get("tool_calls", [])} if last else set()
+    render_mermaid(build_agent_mermaid(get_graph(st.session_state.model), st.session_state.last_path, used_tools))
 
     st.subheader("Herramientas del agente")
     rows = []
@@ -341,18 +464,23 @@ def main() -> None:
     chat, grafo, monitoreo = st.tabs([":material/chat: Chat", ":material/account_tree: Grafo del agente", ":material/monitoring: Monitoreo"])
 
     with chat:
-        if not st.session_state.messages:
-            st.info("Escribe tu consulta abajo o usa un ejemplo de la barra lateral. Los pedidos de prueba van de TRK-2001 a TRK-2010.")
-        for message in st.session_state.messages:
-            avatar = ":material/person:" if message["role"] == "user" else ":material/eco:"
-            with st.chat_message(message["role"], avatar=avatar):
-                st.markdown(message["content"])
-                if message["role"] == "assistant":
-                    render_assistant_extras(message)
+        # El historial va en un contenedor creado antes del campo de texto, así
+        # los mensajes nuevos se dibujan arriba y el campo queda siempre abajo.
+        history = st.container()
+        with history:
+            if not st.session_state.messages and not clicked:
+                st.info("Escribe tu consulta abajo o usa un ejemplo de la barra lateral. Los pedidos de prueba van de TRK-2001 a TRK-2010.")
+            for message in st.session_state.messages:
+                avatar = ":material/person:" if message["role"] == "user" else ":material/eco:"
+                with st.chat_message(message["role"], avatar=avatar):
+                    st.markdown(message["content"])
+                    if message["role"] == "assistant":
+                        render_assistant_extras(message)
 
         prompt = st.chat_input("Escribe tu consulta, por ejemplo: quiero devolver el pedido TRK-2001")
         if prompt or clicked:
-            handle_prompt(prompt or clicked)
+            with history:
+                handle_prompt(prompt or clicked)
 
     with grafo:
         graph_tab()

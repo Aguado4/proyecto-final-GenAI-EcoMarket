@@ -63,7 +63,8 @@ Hechos del proyecto que apoyan la elección:
   una herramienta con esquema JSON para el LLM.
 - LangGraph permite agregar nodos propios (el guardrail de entrada),
   memoria por conversación (`InMemorySaver`), un límite de pasos y
-  `draw_mermaid()`, que la app usa para dibujar el grafo en vivo.
+  `get_graph()`, que expone los nodos y aristas reales que la app usa para
+  dibujar el grafo en vivo.
 
 ## Flujo del proceso de devolución
 

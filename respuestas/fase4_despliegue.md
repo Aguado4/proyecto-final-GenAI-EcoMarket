@@ -36,8 +36,10 @@ Funcionalidades de Streamlit que usa la app (para apoyar la justificación):
   desplegable muestra los argumentos y respuestas de cada herramienta.
 - **Barra lateral:** modelo de Groq, botón de nueva conversación, 8
   ejemplos de un clic y la tabla de pedidos de prueba.
-- **Grafo del agente:** el grafo real de LangGraph (`draw_mermaid()`),
-  con los nodos del último turno resaltados, más la tabla de herramientas.
+- **Grafo del agente:** el grafo real de LangGraph (nodos y aristas de
+  `get_graph()`) con las 5 herramientas expandidas, el camino y las
+  herramientas del último turno resaltados, y una leyenda que distingue las
+  aristas obligatorias de las condicionales. Debajo, la tabla de herramientas.
 - **Monitoreo:** métricas y tabla del registro de acciones.
 
 ## Demostración funcional
