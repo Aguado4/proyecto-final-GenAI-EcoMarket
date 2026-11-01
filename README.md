@@ -13,6 +13,7 @@ una interfaz web en Streamlit.
 | 3 — Análisis crítico y propuestas de mejora | [`respuestas/fase3_analisis_critico.md`](./respuestas/fase3_analisis_critico.md) |
 | 4 — Despliegue | `app_streamlit.py` + [`respuestas/fase4_despliegue.md`](./respuestas/fase4_despliegue.md) |
 | Casos de prueba | [`respuestas/casos_de_prueba.md`](./respuestas/casos_de_prueba.md) |
+| Video de demostración | [Google Drive](https://drive.google.com/file/d/1-D9Vsre_FRkHUty1JjfRNCdU0l2U2CaD/view?usp=sharing) |
 
 ## Arquitectura
 
